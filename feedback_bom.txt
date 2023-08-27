@@ -1,7 +1,20 @@
-Bot: Você: teste
-Bot: gosto de você
+
+
+Você: Estamos fazendo nosso melhor
+Bot: Golfinhos usam um sentido, semelhante ao sonar, para determinar a localização e forma de itens próximos
 
 
 
-Você: 
+
+Você: Treinamento é util
+Bot: Eu estou trabalhando em um projeto
+
+
+
+
+Você: Calma ai menina
+Bot: O melhor do dia para você!
+
+
+
 
