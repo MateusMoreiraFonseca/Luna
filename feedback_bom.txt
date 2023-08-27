@@ -1,0 +1,13 @@
+Resposta 5: Oi, prazer em conhece-lo.
+Entrada: ola
+Resposta: Quem espera sempre alcança
+
+Entrada: ola
+Resposta: que ótimo também sou fascinada pelo seu amor
+
+Entrada: Tudo bem com voce
+Resposta: Como vai você?
+
+Entrada: Ola
+Resposta: Parece que o seu familiar com o Zen de Python
+
