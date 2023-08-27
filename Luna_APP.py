@@ -131,4 +131,7 @@ if __name__ == "__main__":
         )  # Configura o método "sair" para quando a janela for fechada
         root.mainloop()
 
-        
+        if hasattr(app, "should_restart") and app.should_restart:
+            print("Reiniciado com sucesso!")
+        else:
+            break
