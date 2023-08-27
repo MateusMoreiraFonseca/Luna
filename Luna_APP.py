@@ -2,7 +2,7 @@ import tkinter as tk
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
 from gtts import gTTS
-import joblib
+
 import os
 
 import pygame
@@ -20,24 +20,80 @@ class InterfaceChatbot:
         self.entrada_texto = tk.Entry(root, width=50)
         self.entrada_texto.pack()
         self.entrada_texto.focus_set()
-        self.entrada_texto.bind("<Return>", self.obter_e_exibir_resposta)
+
+        self.entrada_texto.bind("<Return>")
 
         botao_enviar = tk.Button(
             root, text="Enviar", command=self.obter_e_exibir_resposta
         )
-        botao_enviar.pack()
+
+        botao_enviar.pack()        
         self.botao_enviar = botao_enviar
 
         self.resposta_texto = tk.Text(root, width=50, height=10, state=tk.DISABLED)
         self.resposta_texto.pack()
+        
 
-        botao_feedback = tk.Button(
-            root, text="Avaliar Resposta", command=self.exibir_interface_feedback
-        )
-        botao_feedback.pack()
-
+        self.opcoes_avaliacao = ["Boa", "Ruim"] 
         self.avaliacao_var = tk.StringVar()
         self.radio_buttons = []
+        self.entrada_usuario =  self.entrada_texto.get() 
+
+        botao_feedback_boa = tk.Button(
+            root, text="Boa", command=lambda: self.avaliar_resposta("Boa")
+        )
+        botao_feedback_boa.pack()
+
+        botao_feedback_ruim = tk.Button(
+            root, text="Ruim", command=lambda: self.avaliar_resposta("Ruim")
+        )
+        botao_feedback_ruim.pack()
+
+    def avaliar_resposta(self, avaliacao):
+        resposta = self.resposta_texto.get("1.0", tk.END)
+        entrada_usuario = self.entrada_usuario 
+        dialogo = f"Bot: {resposta}\nVocê: {entrada_usuario}"  # Concatenação do diálogo
+
+        if avaliacao == "Boa":
+            self.salvar_feedback_bom(dialogo)
+
+        # Limpar a entrada e a resposta
+        self.entrada_texto.delete(0, tk.END)
+        self.resposta_texto.config(state=tk.NORMAL)
+        self.resposta_texto.delete("1.0", tk.END)
+        self.resposta_texto.config(state=tk.DISABLED)
+
+            
+
+    def exibir_interface_feedback(self):
+        self.interface_feedback = tk.Toplevel(self.root)
+        self.interface_feedback.title("Avaliar Resposta")        
+
+        for opcao in self.opcoes_avaliacao:
+            radio_button = tk.Radiobutton(
+                self.interface_feedback, text=opcao, variable=self.avaliacao_var, value=opcao
+            )
+            radio_button.pack()
+            self.radio_buttons.append(radio_button)
+
+        botao_avaliar = tk.Button(
+            self.interface_feedback,
+            text="Enviar Avaliação",
+            command=self.receber_avaliacao()
+        )
+        botao_avaliar.pack()
+
+    def receber_avaliacao(self):
+        avaliacao = self.avaliacao_var.get()
+        
+        dialogo = self.resposta_texto.get("1.0", tk.END)  # Obter a resposta exibida
+
+        if avaliacao == "Boa":
+            self.salvar_feedback_bom(dialogo)           
+            
+
+        self.interface_feedback.destroy()
+        
 
     def obter_e_exibir_resposta(self, event=None):
         entrada_usuario = self.entrada_texto.get()
@@ -45,14 +101,15 @@ class InterfaceChatbot:
 
         self.resposta_texto.config(state=tk.NORMAL)
         self.resposta_texto.delete("1.0", tk.END)
-        self.resposta_texto.insert(tk.END, str(resposta))
+        self.resposta_texto.insert(tk.END, f"Você: {entrada_usuario}\n")
+        self.resposta_texto.insert(tk.END, f"Bot: {resposta}\n\n")
         self.resposta_texto.config(state=tk.NORMAL)
 
         self.criar_audio_resposta(str(resposta))  # Criar e reproduzir áudio da resposta
 
-        self.entrada_texto.delete(0, tk.END)
+        self.entrada_texto.delete(0, tk.END)      
 
-        self.salvar_feedback_bom(entrada_usuario, str(resposta))
+        
 
     def criar_audio_resposta(self, texto):
         tts = gTTS(texto, lang="pt-BR")
@@ -68,40 +125,10 @@ class InterfaceChatbot:
         pygame.mixer.quit()
         os.remove("resposta.mp3")
 
-    def salvar_feedback_bom(self, entrada, resposta):
+    def salvar_feedback_bom(self, dialogo):
         with open("feedback_bom.txt", "a", encoding="utf-8") as f:
-            f.write(f"Entrada: {entrada}\nResposta: {resposta}\n\n")
-
-    def exibir_interface_feedback(self, resposta):
-        self.interface_feedback = tk.Toplevel(self.root)
-        self.interface_feedback.title("Avaliar Resposta")
-
-        self.avaliacao_var.set("Boa")
-
-        opcoes_avaliacao = ["Boa", "Ruim"]
-        for opcao in opcoes_avaliacao:
-            radio_button = tk.Radiobutton(
-                self.interface_feedback, text=opcao, variable=self.avaliacao_var, value=opcao
-            )
-            radio_button.pack()
-            self.radio_buttons.append(radio_button)
-
-        botao_avaliar = tk.Button(
-            self.interface_feedback,
-            text="Enviar Avaliação",
-            command=lambda: self.receber_avaliacao(resposta),
-        )
-        botao_avaliar.pack()
-
-
-    def receber_avaliacao(self, resposta):
-        avaliacao = self.avaliacao_var.get()
-        if avaliacao == "Boa":
-            entrada_usuario = self.entrada_texto.get()
-            self.salvar_feedback_bom(entrada_usuario, resposta)
-
-        self.interface_feedback.destroy()
-        self.avaliacao_var.set("Boa")
+            f.write(f"{dialogo}\n\n")
+    
 
 
 def treinar_chatbot():
